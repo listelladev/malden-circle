@@ -1168,7 +1168,7 @@
     // ─── Hero parallax ────────────────────────────────
     gsap.to('#hero-bg', {
       y: '25%', ease: 'none',
-      scrollTrigger: { trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+      scrollTrigger: { trigger:'#hero', start:'top top', end:'bottom top', scrub: isTouchDevice ? 1 : true }
     });
 
     // ─── Hero text fades on scroll ────────────────────
