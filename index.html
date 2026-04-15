@@ -32,6 +32,7 @@
       -webkit-font-smoothing: antialiased;
       overflow-x: hidden;
       cursor: none;
+      overscroll-behavior-y: none;
     }
 
     /* ─── Cursor ─────────────────────────────────── */
@@ -1120,8 +1121,6 @@
         stop:  () => { document.body.style.overflow = 'hidden'; },
         start: () => { document.body.style.overflow = ''; },
       };
-      // THE fix for iOS Safari jitter: normalizes scroll through GSAP's RAF loop
-      ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
       ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
     }
     gsap.ticker.lagSmoothing(0);
@@ -1259,17 +1258,18 @@
       const img = wrap.querySelector('img');
       if (!img) return;
 
-      // On mobile, skip parallax for gallery slider images (clipped, not worth the CPU)
-      if (isTouchDevice && wrap.closest('.splide__slide')) return;
-
       if (isTouchDevice) {
+        // Mobile: only parallax the full-width break images — everything else just fades in
+        // (hero has its own dedicated parallax already)
+        if (!wrap.closest('.brk-wrap')) return;
         gsap.fromTo(img,
-          { y: '-3%' },
-          { y: '3%', ease: 'none',
-            scrollTrigger: { trigger: wrap, start: 'top bottom', end: 'bottom top', scrub: 0.5 }
+          { y: '-4%' },
+          { y: '4%', ease: 'none',
+            scrollTrigger: { trigger: wrap, start: 'top bottom', end: 'bottom top', scrub: true }
           }
         );
       } else {
+        // Desktop: full parallax on all images
         gsap.fromTo(img,
           { y: '-8%' },
           { y: '8%', ease: 'none',
