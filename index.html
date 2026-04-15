@@ -1,0 +1,1414 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <title>16462 Malden Circle | Huntington Beach</title>
+  <meta content="width=device-width, initial-scale=1" name="viewport"/>
+
+  <link rel="stylesheet" href="https://use.typekit.net/gxi6ehf.css">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@300;400;500;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/css/splide-core.min.css">
+
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    :root {
+      --black:  #0a0a0a;
+      --white:  #ffffff;
+      --rule:   #d4d4d4;
+      --muted:  #909090;
+      --ph:     clamp(24px, 5vw, 80px);
+      --spy:    clamp(80px, 10vw, 140px);
+    }
+
+    html { font-size: 16px; }
+    body {
+      background: var(--white);
+      color: var(--black);
+      font-family: 'Space Grotesk', Helvetica, sans-serif;
+      font-weight: 400;
+      -webkit-font-smoothing: antialiased;
+      overflow-x: hidden;
+      cursor: none;
+    }
+
+    /* ─── Cursor ─────────────────────────────────── */
+    #c-dot {
+      position: fixed; z-index: 9999;
+      width: 7px; height: 7px;
+      background: var(--black);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%,-50%);
+      transition: background .2s;
+    }
+    #c-ring {
+      position: fixed; z-index: 9998;
+      width: 34px; height: 34px;
+      border: 1px solid rgba(10,10,10,0.35);
+      border-radius: 50%;
+      pointer-events: none;
+      transform: translate(-50%,-50%);
+      transition: width .3s ease, height .3s ease, opacity .3s ease, border-color .2s;
+    }
+    body.ch #c-ring { width: 54px; height: 54px; opacity:.5; }
+    body.lb-open #c-dot { background: #fff; }
+    body.lb-open #c-ring { border-color: rgba(255,255,255,0.4); }
+    @media (pointer:coarse) { body { cursor: auto; } #c-dot, #c-ring { display:none; } }
+
+    /* ─── Loader ─────────────────────────────────── */
+    #loader {
+      position: fixed; inset: 0; z-index: 7000;
+      background: var(--white);
+      display: flex; align-items: center; justify-content: center;
+    }
+    #loader-txt {
+      font-family: "area-normal", sans-serif;
+      font-weight: 600; font-style: normal;
+      font-size: clamp(16px, 2.5vw, 32px);
+      letter-spacing: .22em;
+      text-transform: uppercase;
+      opacity: 0;
+    }
+
+    /* ─── Nav ────────────────────────────────────── */
+    #nav {
+      position: fixed; top: 0; left: 0; right: 0; z-index: 700;
+      padding: 22px var(--ph);
+      display: flex; align-items: center; justify-content: space-between;
+      transition: background .5s, border-color .5s;
+      border-bottom: 1px solid transparent;
+    }
+    #nav.on {
+      background: #fff;
+      border-bottom-color: var(--rule);
+    }
+    .nav-logo {
+      font-family: "area-normal", sans-serif;
+      font-weight: 600; font-style: normal;
+      font-size: 12px; letter-spacing: .16em; text-transform: uppercase;
+      color: var(--black); text-decoration: none;
+      opacity: 0;
+      transition: opacity .4s;
+    }
+    #nav.on .nav-logo { opacity: 1; }
+    #nav.menu-open .nav-logo { opacity: 1; color: var(--black); }
+    #nav.menu-open { background: #fff; border-bottom-color: var(--rule); }
+    .nav-links { display: flex; gap: 28px; list-style: none; opacity: 0; transition: opacity .4s; }
+    #nav.on .nav-links { opacity: 1; }
+    .nav-links a {
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--black);
+      text-decoration: none;
+      transition: opacity .25s;
+      position: relative;
+    }
+    .nav-links a::after {
+      content:''; position:absolute; bottom:-3px; left:0;
+      width:0; height:1px; background: currentColor;
+      transition: width .3s;
+    }
+    .nav-links a:hover::after { width:100%; }
+    .nav-burger { display:none; flex-direction:column; gap:5px; cursor:none; opacity: 0; transition: opacity .4s; }
+    #nav.on .nav-burger { opacity: 1; }
+    .nav-burger .b-line { display:block; width:22px; height:1px; background: var(--black); }
+
+    /* ─── Mobile menu ────────────────────────────── */
+    #m-menu {
+      display: flex; position:fixed; inset:0; z-index:601;
+      background: var(--white);
+      padding: 80px var(--ph) 60px;
+      flex-direction: column;
+      transform: translateY(-100%);
+      visibility: hidden;
+      transition: transform 0.55s cubic-bezier(0.76, 0, 0.24, 1), visibility 0.55s;
+    }
+    #m-menu.open {
+      transform: translateY(0);
+      visibility: visible;
+    }
+    #m-menu a {
+      font-family: "area-normal", sans-serif;
+      font-weight:600; font-style:normal;
+      font-size: 18px;
+      letter-spacing:.08em; text-transform:uppercase;
+      color: var(--black); text-decoration:none;
+      border-bottom: 1px solid var(--rule);
+      padding: 16px 0;
+    }
+    /* burger ↔ close swap */
+    .nav-burger .b-close {
+      display: none;
+      font-family: 'Space Grotesk', Helvetica, sans-serif;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .16em; text-transform: uppercase;
+      color: var(--black);
+    }
+    #nav.menu-open .nav-burger .b-line { display: none; }
+    #nav.menu-open .nav-burger .b-close { display: block; }
+    #nav.menu-open .nav-burger { opacity: 1; }
+
+    /* ─── Helpers ────────────────────────────────── */
+    .pad { padding-left: var(--ph); padding-right: var(--ph); }
+    .spy { padding-bottom: var(--spy); }
+
+    /* sections after break images need top padding back */
+    #gallery  { padding-top: var(--spy); }
+    #highlights { padding-top: var(--spy); }
+    /* preview follows intro-grid (no bottom), needs both */
+    #preview  { padding-top: var(--spy); }
+
+    /* ─── Section eyebrow label ──────────────────── */
+    .sec-eyebrow {
+      font-family: "area-normal", sans-serif;
+      font-weight: 600; font-style: normal;
+      font-size: 32px;
+      color: var(--black);
+      letter-spacing: .05em; text-transform: uppercase;
+      line-height: 1.15;
+      text-align: center;
+      margin-bottom: clamp(44px,5.5vw,72px);
+      opacity: 0;
+    }
+
+    /* ─── Text interlude ─────────────────────────── */
+    .interlude {
+      padding: clamp(100px,12vw,160px) var(--ph);
+      text-align: center;
+    }
+    .interlude-inner {
+      max-width: 780px;
+      margin: 0 auto;
+    }
+    .il-h {
+      font-family: "area-normal", sans-serif;
+      font-weight: 600; font-style: normal;
+      font-size: 32px;
+      color: var(--black);
+      letter-spacing: .05em; text-transform: uppercase;
+      line-height: 1.15; margin-bottom: 32px;
+      opacity: 0;
+    }
+    .il-body {
+      font-size: clamp(14px,1.2vw,16px);
+      font-weight: 300; line-height: 1.95; color: #484848;
+      max-width: 520px; margin: 0 auto 40px;
+      opacity: 0;
+    }
+    .il-link {
+      display: inline-block;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .2em; text-transform: uppercase;
+      color: var(--black); text-decoration: none;
+      border-bottom: 1px solid currentColor;
+      padding-bottom: 3px;
+      transition: opacity .25s;
+      opacity: 0;
+    }
+    .il-link:hover { opacity: .45; }
+
+    /* ─── Full-width break image ─────────────────── */
+    .brk-wrap {
+      height: clamp(665px, 96vh, 1225px);
+    }
+    .brk-wrap img {
+      height: 120%; width: 100%;
+      object-fit: cover;
+    }
+
+    /* ─── Hero ───────────────────────────────────── */
+    #hero {
+      position:relative; height:100vh; min-height:640px;
+      overflow:visible; display:flex; align-items:flex-start; justify-content:center;
+    }
+    #hero-media {
+      position:absolute; inset:0; overflow:hidden; pointer-events:none;
+    }
+    #hero-bg {
+      position:absolute;
+      top: -40%; left:0; right:0; bottom:0;
+      background: url('images/hero.webp') bottom center/cover no-repeat;
+      will-change: transform;
+    }
+    #hero-veil { display: none; }
+    .hero-c {
+      position:relative; z-index:2;
+      width:100%;
+      padding: clamp(36px,4.5vh,64px) var(--ph) 0;
+      text-align: center;
+      display:flex; flex-direction:column; align-items:center;
+    }
+    .hero-h1 {
+      font-family: "area-normal", sans-serif;
+      font-weight:600; font-style:normal;
+      font-size: clamp(52px,10vw,140px);
+      letter-spacing:.06em; line-height:.92;
+      color:#fff; text-transform:uppercase;
+      margin-bottom:20px;
+      will-change: opacity;
+    }
+    .hero-h1 span { display:block; }
+    .hero-h1 span em { display:block; font-style:normal; opacity:0; }
+    .hero-loc {
+      overflow: hidden;
+      will-change: opacity;
+    }
+    .hero-loc span {
+      display:block;
+      font-size: 20px; font-weight:400; letter-spacing:.22em; text-transform:uppercase;
+      color:rgba(255,255,255,.72);
+      transform: translateY(100%);
+    }
+
+    /* ─── 2-up intro grid ────────────────────────── */
+    .intro-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 12px;
+      padding: 0 var(--ph);
+    }
+    .intro-grid .para-wrap {
+      aspect-ratio: 1/1;
+    }
+
+    /* ─── Para wrap (parallax container) ─────────── */
+    .para-wrap {
+      overflow: hidden;
+      position: relative;
+      cursor: pointer;
+    }
+    .para-wrap img {
+      width:100%; height:115%;
+      object-fit:cover; display:block;
+      transform: translateY(0);
+      will-change: transform;
+    }
+
+    /* ─── Preview — unified 2×4 stats grid ──────── */
+    .pv-unified {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 0 20px;
+      padding-bottom: var(--spy);
+    }
+    .pv-item {
+      padding: clamp(20px,2.5vw,32px) clamp(16px,2.5vw,36px);
+      border-bottom: 1px solid var(--rule);
+      opacity: 0;
+      transform: translateY(10px);
+    }
+    .d-lbl { font-size:10px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-bottom:8px; display:block; }
+    .d-val { font-size:13px; font-weight:400; line-height:1.5; }
+
+    /* ─── Sliders ────────────────────────────────── */
+    .splide-outer { overflow:hidden; }
+    .splide__track { overflow:visible; }
+    .splide__slide { overflow:hidden; }
+    .splide__slide .para-wrap { aspect-ratio:5/5.2; }
+    .splide__slide .para-wrap img { height:120%; }
+
+    .sl-nav {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      margin-top: 18px;
+    }
+    .sl-arrows { display: flex; gap: 10px; }
+    .sl-btn {
+      display:inline-flex; align-items:center; justify-content:center;
+      width:42px; height:42px;
+      border:1px solid var(--black);
+      background:transparent; cursor:none;
+      text-decoration:none; color:var(--black);
+      transition: background .3s, color .3s;
+    }
+    .sl-btn:hover { background:var(--black); color:#fff; }
+    .sl-btn svg { width:15px; height:7px; }
+    .gallery-cta-btn {
+      font-family: 'Space Grotesk', Helvetica, sans-serif;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--black);
+      background: transparent;
+      border: 1px solid var(--black);
+      padding: 13px 28px;
+      cursor: none;
+      transition: background .3s, color .3s;
+    }
+    .gallery-cta-btn:hover { background: var(--black); color: #fff; }
+
+    /* ─── About — centered ───────────────────────── */
+    .about-centered {
+      padding: 0 var(--ph) var(--spy);
+      text-align: center;
+    }
+    .about-centered-inner {
+      max-width: 860px;
+      margin: 0 auto;
+    }
+    .about-centered-title {
+      font-family: "area-normal", sans-serif;
+      font-weight: 600; font-style: normal;
+      font-size: 32px;
+      color: var(--black);
+      letter-spacing: .05em; text-transform: uppercase;
+      line-height: 1.15; margin-bottom: 36px;
+      opacity: 0;
+    }
+    .about-centered-body {
+      font-size: clamp(14px,1.2vw,16px);
+      font-weight: 300; line-height: 1.95; color: #484848;
+      max-width: 680px; margin: 0 auto;
+    }
+    .about-centered-body p + p { margin-top: 24px; }
+    .about-centered-body p { opacity: 0; }
+
+    /* ─── Highlights ─────────────────────────────── */
+    .hl-grid {
+      display:grid; grid-template-columns:repeat(4,1fr);
+      gap: clamp(28px,4vw,48px) clamp(24px,3.5vw,48px);
+      padding: clamp(32px,4vw,52px) 0;
+    }
+    .hl-item { overflow:hidden; }
+    .hl-v {
+      font-family: "area-normal", sans-serif;
+      font-weight:600; font-style:normal;
+      font-size: clamp(13px,1.4vw,17px);
+      letter-spacing:.06em; text-transform:uppercase;
+      line-height:1.3;
+      transform:translateY(20px); opacity:0;
+    }
+    .hl-l { font-size:10px; font-weight:500; letter-spacing:.16em; text-transform:uppercase; color:var(--muted); margin-top:8px; }
+
+    /* ─── Map ────────────────────────────────────── */
+    .map-w { height:520px; overflow:hidden; position:relative; }
+    .map-w iframe { width:100%; height:100%; border:0; display:block; filter:grayscale(.15); }
+    .map-overlay {
+      position: absolute; inset: 0; z-index: 2;
+      background: transparent; cursor: pointer;
+    }
+
+    /* ─── Details ────────────────────────────────── */
+    .acc-item { border-top:1px solid var(--rule); }
+    .acc-item:last-child { border-bottom:1px solid var(--rule); }
+    .acc-trigger {
+      width:100%; background:none; border:none; cursor:none;
+      display:flex; align-items:center; justify-content:space-between;
+      padding:24px 0; text-align:left;
+    }
+    .acc-label {
+      font-family: "area-normal", sans-serif;
+      font-weight:600; font-style:normal;
+      font-size: clamp(14px,1.8vw,19px);
+      letter-spacing:.07em; text-transform:uppercase;
+    }
+    .acc-icon {
+      width:22px; height:22px; flex-shrink:0;
+      display:flex; align-items:center; justify-content:center;
+      transition: transform .35s cubic-bezier(.4,0,.2,1);
+    }
+    .acc-icon svg { width:12px; height:12px; }
+    .acc-item.open .acc-icon { transform:rotate(45deg); }
+    .acc-body { max-height:0; overflow:hidden; transition: max-height .45s cubic-bezier(.4,0,.2,1); }
+    .acc-inner { padding:0 0 36px; }
+    .detail-list {
+      display:grid; grid-template-columns:repeat(2,1fr);
+      gap:0;
+    }
+    .dl-item {
+      font-size:13px; font-weight:400; letter-spacing:.03em;
+      padding:12px 0 12px 20px;
+      border-bottom:1px solid var(--rule);
+      position:relative;
+      transition: color .2s;
+    }
+    .dl-item::before {
+      content:''; position:absolute; left:0; top:50%;
+      width:5px; height:1px; background:var(--muted);
+    }
+    .dl-item:hover { color:var(--muted); }
+    .detail-list .dl-item:nth-last-child(-n+2) { border-bottom: none; }
+    @media (max-width:640px) { .detail-list { grid-template-columns:1fr; } }
+
+    /* ─── Contact ────────────────────────────────── */
+    .contact-g { display:grid; grid-template-columns:1fr 1fr; gap:80px; align-items:stretch; }
+    .contact-img-w { overflow:hidden; display:flex; }
+    .contact-img-w .para-wrap { flex:1; aspect-ratio:auto; height:100%; min-height:400px; }
+    .contact-img-w .para-wrap img { height:115%; }
+    .cform-col { padding-top:8px; }
+    .f-row { display:grid; grid-template-columns:1fr 1fr; gap:16px; }
+    .f-group { margin-bottom:16px; }
+    .f-field {
+      width:100%; border:none; border-bottom:1px solid var(--rule);
+      padding:14px 0;
+      font-family:'Space Grotesk',Helvetica,sans-serif;
+      font-size:14px; font-weight:400;
+      background:transparent; color:var(--black);
+      outline:none; transition: border-color .3s;
+    }
+    .f-field:focus { border-color:var(--black); }
+    .f-field::placeholder { color:var(--muted); }
+    textarea.f-field { resize:none; height:96px; display:block; }
+    .f-sub {
+      margin-top:28px;
+      display:inline-block; padding:15px 42px;
+      background:var(--black); color:#fff;
+      font-family:'Space Grotesk',Helvetica,sans-serif;
+      font-size:10px; font-weight:500;
+      letter-spacing:.18em; text-transform:uppercase;
+      border:1px solid var(--black); cursor:none;
+      transition: background .3s, color .3s;
+    }
+    .f-sub:hover { background:#fff; color:var(--black); }
+    .f-ok, .f-err { display:none; margin-top:18px; font-size:12px; letter-spacing:.04em; }
+    .f-ok { color:#2d6a2d; } .f-err { color:#a02020; }
+    .c-agents-row {
+      display: flex; gap: 48px;
+      margin-top: 40px; padding-top: 32px;
+      border-top: 1px solid var(--rule);
+    }
+    .c-agents-row .c-agent { flex: 1; }
+    .c-agent-name {
+      font-family:"area-normal",sans-serif;
+      font-weight:600; font-style:normal;
+      font-size:14px; letter-spacing:.1em; text-transform:uppercase;
+    }
+    .c-agent-info { font-size:11px; color:var(--muted); letter-spacing:.05em; margin-top:8px; line-height:1.9; }
+    .c-agent-info a { color:var(--muted); }
+    .c-agent-ig {
+      display: inline-flex; align-items: center; gap: 5px;
+      color: var(--muted); text-decoration: none;
+    }
+    .c-agent-ig:hover { color: var(--black); }
+    .c-agent-ig svg { flex-shrink: 0; }
+
+    /* ─── Lightbox ───────────────────────────────── */
+    #lightbox {
+      position: fixed; inset: 0; z-index: 9000;
+      background: rgba(53,81,97,0);
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: none;
+      visibility: hidden;
+      transition: background 0.4s ease, visibility 0.4s;
+    }
+    #lightbox.open {
+      background: rgba(53,81,97,1);
+      pointer-events: all;
+      visibility: visible;
+    }
+    #lb-img-wrap {
+      max-width: 84vw; max-height: 82vh;
+      opacity: 0; transform: scale(0.94);
+      transition: opacity 0.4s ease, transform 0.4s ease;
+    }
+    #lightbox.open #lb-img-wrap { opacity: 1; transform: scale(1); }
+    #lb-img {
+      max-width: 84vw; max-height: 82vh;
+      object-fit: contain; display: block;
+      transition: opacity 0.22s ease;
+    }
+    #lb-close {
+      position: absolute; top: 24px; right: 32px;
+      background: none; border: none; color: #fff;
+      font-size: 28px; line-height: 1; cursor: none;
+      opacity: 0.7; transition: opacity 0.2s; padding: 8px;
+    }
+    #lb-close:hover { opacity: 1; }
+    #lb-prev, #lb-next {
+      position: absolute; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: #fff;
+      cursor: none; padding: 20px;
+      opacity: 0.7; transition: opacity 0.2s;
+      display: flex; align-items: center; justify-content: center;
+    }
+    #lb-prev { left: 16px; }
+    #lb-next { right: 16px; }
+    #lb-prev:hover, #lb-next:hover { opacity: 1; }
+    #lb-prev svg, #lb-next svg { width: 36px; height: 16px; }
+    #lb-counter {
+      position: absolute; bottom: 24px; left: 50%; transform: translateX(-50%);
+      color: rgba(255,255,255,0.55);
+      font-size: 11px; letter-spacing: .12em;
+      font-family: 'Space Grotesk', Helvetica, sans-serif;
+      white-space: nowrap;
+    }
+    #lb-arrows-mobile { display: none; }
+    @media(max-width:640px) {
+      #lb-prev, #lb-next { display: none; }
+      #lb-counter { display: none; }
+      #lb-img-wrap { max-width: 92vw; }
+      #lb-img { max-width: 92vw; max-height: 72vh; }
+      #lb-arrows-mobile {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 16px; padding: 0 4px;
+      }
+      #lb-prev-m, #lb-next-m {
+        background: none; border: none; color: #fff;
+        cursor: pointer; padding: 10px;
+        opacity: 0.8;
+        display: flex; align-items: center; justify-content: center;
+      }
+      #lb-prev-m svg, #lb-next-m svg { width: 28px; height: 12px; }
+      #lb-counter-m {
+        font-family: 'Space Grotesk', Helvetica, sans-serif;
+        font-size: 11px; letter-spacing: .12em;
+        color: rgba(255,255,255,0.55);
+        white-space: nowrap;
+      }
+    }
+
+    /* ─── Editorial collage ─────────────────────── */
+    #views { padding: 0 var(--ph) var(--spy); }
+    .editorial-grid {
+      display: flex;
+      flex-direction: column;
+      gap: clamp(12px, 1.5vw, 20px);
+    }
+    .editorial-row {
+      display: flex;
+      align-items: flex-start;
+    }
+    .ed-50 { flex: 0 0 50%; overflow: hidden; }
+    .ed-40 { flex: 0 0 40%; overflow: hidden; }
+    .ed-spacer { flex: 0 0 10%; }
+    .ed-vspace { height: clamp(40px,5vw,80px); }
+    .ed-50 .para-wrap { aspect-ratio: 4/3; }
+    .ed-40-sq .para-wrap { aspect-ratio: 5/4; }
+    .ed-40-land .para-wrap { aspect-ratio: 4/3; }
+    @media(max-width:640px) {
+      .ed-50 { flex: 0 0 56%; }
+      .ed-40 { flex: 0 0 37%; }
+      .ed-spacer { flex: 0 0 7%; }
+      .ed-vspace { height: clamp(24px, 4vw, 40px); }
+    }
+
+    /* ─── Footer ─────────────────────────────────── */
+    #footer {
+      padding: clamp(40px,5vw,64px) var(--ph);
+      border-top: 1px solid var(--rule);
+      display: flex; align-items: center; justify-content: space-between; gap: 24px;
+    }
+    .ft-logos {
+      display: flex; align-items: center;
+      gap: clamp(24px,3.5vw,48px);
+    }
+    .ft-logo { height: 44px; width: auto; object-fit: contain; display: block; }
+    .ft-logo-agency { height: 53px; }
+    .ft-right {
+      display: flex; flex-direction: column;
+      align-items: flex-end; gap: 8px;
+    }
+    .ft-address {
+      font-size: 10px; letter-spacing: .1em; text-transform: uppercase;
+      color: var(--muted); text-align: right;
+    }
+    .ft-copy { font-size: 10px; letter-spacing: .06em; color: var(--muted); text-align: right; }
+
+    /* ─── Sticky gallery button ──────────────────── */
+    #sticky-gallery {
+      position: fixed; bottom: 28px; right: 28px;
+      z-index: 500;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .4s;
+    }
+    #sticky-gallery.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    #btn-sticky-gallery {
+      font-family: 'Space Grotesk', Helvetica, sans-serif;
+      font-size: 10px; font-weight: 500;
+      letter-spacing: .18em; text-transform: uppercase;
+      color: var(--black);
+      background: rgba(255,255,255,0.86);
+      border: 1px solid rgba(10,10,10,0.2);
+      padding: 14px 26px;
+      cursor: none;
+      backdrop-filter: blur(14px);
+      -webkit-backdrop-filter: blur(14px);
+      transition: background .3s, border-color .3s, color .3s;
+    }
+    #btn-sticky-gallery:hover { background: var(--black); color: #fff; border-color: var(--black); }
+
+    /* ─── Responsive ─────────────────────────────── */
+    @media(max-width:1024px) {
+      .pv-unified { grid-template-columns: repeat(2, 1fr); }
+      .pv-item:nth-last-child(-n+2) { border-bottom: none; }
+    }
+    @media(max-width:991px) {
+      .hl-grid { grid-template-columns:repeat(2,1fr); }
+      .contact-g { grid-template-columns:1fr; gap:48px; }
+      .nav-links { display:none; }
+      .nav-burger { display:flex; }
+    }
+    @media(max-width:640px) {
+      .pv-unified { grid-template-columns: repeat(2, 1fr); }
+      .pv-item:nth-last-child(-n+2) { border-bottom: none; }
+      .intro-grid { grid-template-columns:1fr; }
+      .f-row { grid-template-columns:1fr; }
+      .hl-grid { grid-template-columns:repeat(2,1fr); }
+      .c-agents-row { flex-direction: column; gap: 28px; }
+      .hero-loc span { font-size: 16px; }
+      #footer { flex-direction: column; align-items: flex-start; gap: 20px; }
+      .ft-right { align-items: flex-start; }
+      .ft-address, .ft-copy { text-align: left; }
+      #sticky-gallery { bottom: 20px; right: 16px; }
+      #btn-sticky-gallery { padding: 12px 20px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div id="c-dot"></div>
+  <div id="c-ring"></div>
+
+  <div id="loader"><div id="loader-txt">16462 Malden Circle</div></div>
+
+  <nav id="nav">
+    <a href="#hero" class="nav-logo">Malden Circle</a>
+    <ul class="nav-links">
+      <li><a href="#preview">Preview</a></li>
+      <li><a href="#gallery">Gallery</a></li>
+      <li><a href="#about">About</a></li>
+      <li><a href="#highlights">Highlights</a></li>
+      <li><a href="#location">Location</a></li>
+      <li><a href="#contact">Contact</a></li>
+    </ul>
+    <div class="nav-burger" id="burger">
+      <span class="b-line"></span><span class="b-line"></span><span class="b-line"></span>
+      <span class="b-close">Close</span>
+    </div>
+  </nav>
+
+  <div id="m-menu">
+    <a href="#preview"    class="ml">Preview</a>
+    <a href="#gallery"    class="ml">Gallery</a>
+    <a href="#about"      class="ml">About</a>
+    <a href="#highlights" class="ml">Highlights</a>
+    <a href="#location"   class="ml">Location</a>
+    <a href="#details"    class="ml">Details</a>
+    <a href="#contact"    class="ml">Contact</a>
+  </div>
+
+  <main id="main" style="opacity:0">
+
+    <!-- 01 · HERO ──────────────────────────────────── -->
+    <section id="hero">
+      <div id="hero-media">
+        <div id="hero-bg"></div>
+        <div id="hero-veil"></div>
+      </div>
+      <div class="hero-c">
+        <h1 class="hero-h1">
+          <span><em id="he1">Malden Circle</em></span>
+        </h1>
+        <div class="hero-loc"><span id="he2">Huntington Beach</span></div>
+      </div>
+    </section>
+
+    <!-- Crafted for the Water interlude -->
+    <div class="interlude">
+      <div class="interlude-inner">
+        <h2 class="il-h" id="il-h1">Crafted for the Water</h2>
+        <p class="il-body">Set along the protected waterways of Gilbert Island, 16462 Malden Circle is among Huntington Beach's most distinguished residences — 6,731 square feet of architecture, refinement, and an extraordinary connection to the water.</p>
+        <a href="#gallery" class="il-link">Explore the Property</a>
+      </div>
+    </div>
+
+    <!-- intro 2-up grid -->
+    <div class="intro-grid">
+      <div class="para-wrap" id="ig1"><img src="images/crafted-1.webp" alt="Living Area" loading="lazy"/></div>
+      <div class="para-wrap" id="ig2"><img src="images/crafted-2.webp" alt="Kitchen" loading="lazy"/></div>
+    </div>
+
+    <!-- dock interlude -->
+    <div class="interlude" style="padding-bottom:0">
+      <div class="interlude-inner">
+        <h2 class="il-h" id="il-h2">Private Dock Accommodates<br/>±70&prime; Vessel &nbsp;&middot;&nbsp; ±65&prime; Vessel<br/>Plus a Duffy or a Skiff</h2>
+        <p class="il-body" style="margin-bottom:0">Opportunities to acquire a residence of such caliber, position, and architectural significance are exceedingly rare. This custom-built estate stands as one of the premier properties within the Huntington Harbour enclave, occupying a coveted position on the Main Channel of the exclusive Gilbert Island.</p>
+      </div>
+    </div>
+
+    <!-- 02 · PREVIEW ────────────────────────────────── -->
+    <section id="preview" class="pad">
+      <div class="pv-unified">
+        <div class="pv-item"><span class="d-lbl">Bedrooms</span><span class="d-val">4</span></div>
+        <div class="pv-item"><span class="d-lbl">Bathrooms</span><span class="d-val">5</span></div>
+        <div class="pv-item"><span class="d-lbl">Interior</span><span class="d-val">6,731 Sqft</span></div>
+        <div class="pv-item"><span class="d-lbl">Asking Price</span><span class="d-val">$12.5M</span></div>
+        <div class="pv-item"><span class="d-lbl">Status</span><span class="d-val">Coming Soon</span></div>
+        <div class="pv-item"><span class="d-lbl">Year Built</span><span class="d-val">2005</span></div>
+        <div class="pv-item"><span class="d-lbl">Lot Size</span><span class="d-val">7,800 Sqft</span></div>
+        <div class="pv-item"><span class="d-lbl">Property Type</span><span class="d-val">Single Family Residence</span></div>
+      </div>
+    </section>
+
+    <!-- full-width break image -->
+    <div class="brk-wrap para-wrap">
+      <img src="images/above-the-property.webp" alt="" loading="lazy"/>
+    </div>
+
+    <!-- 03 · GALLERY ────────────────────────────────── -->
+    <section id="gallery" class="spy pad">
+      <p class="sec-eyebrow" id="t-gallery">The Property</p>
+      <div class="splide-outer">
+        <div id="sp1" class="splide">
+          <div class="splide__track">
+            <div class="splide__list">
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0257 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0260 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0262 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0265 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0266 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0269 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0271 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0275 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/DJI_0277 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9337 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9338 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9339 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9341 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9345 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9354 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9357 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9359 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9360 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9361 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9363 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9364 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9369 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9371 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9374 - resized.webp" alt="" loading="lazy"/></div></div>
+              <div class="splide__slide"><div class="para-wrap"><img src="public/slider-gallery/JD4_9383 - resized.webp" alt="" loading="lazy"/></div></div>
+            </div>
+          </div>
+        </div>
+        <div class="sl-nav">
+          <div class="sl-arrows">
+            <a href="#" id="s1p" class="sl-btn"><svg viewBox="0 0 16 8" fill="none"><path d="M3.45.91.36 4.01M.36 4.01l3.09 3.1M.36 4.01H15.58" stroke="currentColor" stroke-width=".8"/></svg></a>
+            <a href="#" id="s1n" class="sl-btn"><svg viewBox="0 0 16 8" fill="none"><path d="M12.34.91l3.09 3.1M15.43 4.01l-3.09 3.1M15.43 4.01H.21" stroke="currentColor" stroke-width=".8"/></svg></a>
+          </div>
+          <button class="gallery-cta-btn" id="btn-open-gallery">View Full Gallery</button>
+        </div>
+      </div>
+    </section>
+
+    <!-- 04 · ABOUT — centered ───────────────────────── -->
+    <section id="about" class="about-centered">
+      <div class="about-centered-inner">
+        <h2 class="about-centered-title" id="t-about">Huntington Harbour (Life)</h2>
+        <div class="about-centered-body">
+          <p>Situated upon the prestigious enclave of Gilbert Island within Huntington Harbour, this bespoke four bedroom estate serves as a sanctuary of coastal refinement, spanning an impressive 6,731 square feet of living space.</p>
+          <p>The rear terrace serves as a private vantage point for the vibrant maritime theatre of Huntington Harbour, offering sweeping views of passing yachts and local voyagers.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- full-width break image -->
+    <div class="brk-wrap para-wrap">
+      <img src="images/exceptional-waterfront%20.webp" alt="" loading="lazy"/>
+    </div>
+
+    <!-- 05 · HIGHLIGHTS ─────────────────────────────── -->
+    <section id="highlights" class="spy pad">
+      <p class="sec-eyebrow" id="t-hl">Property Highlights</p>
+      <div class="hl-grid">
+        <div class="hl-item"><div class="hl-v">Bay &amp; Water Views</div><div class="hl-l">Views</div></div>
+        <div class="hl-item"><div class="hl-v">Navigable Waterway</div><div class="hl-l">Waterfront Access</div></div>
+        <div class="hl-item"><div class="hl-v">3-Car Attached</div><div class="hl-l">Garage</div></div>
+        <div class="hl-item"><div class="hl-v">Full Elevator</div><div class="hl-l">Accessibility</div></div>
+        <div class="hl-item"><div class="hl-v">Beamed Ceilings</div><div class="hl-l">Architecture</div></div>
+        <div class="hl-item"><div class="hl-v">Multiple Primary Suites</div><div class="hl-l">Flexibility</div></div>
+        <div class="hl-item"><div class="hl-v">Orange</div><div class="hl-l">County</div></div>
+        <div class="hl-item"><div class="hl-v">Gilbert Island</div><div class="hl-l">Community</div></div>
+      </div>
+    </section>
+
+    <!-- 06 · LOCATION ───────────────────────────────── -->
+    <section id="location" class="spy pad">
+      <p class="sec-eyebrow" id="t-loc">Location</p>
+      <div class="map-w">
+        <div class="map-overlay" id="map-overlay"></div>
+        <iframe src="https://maps.google.com/maps?q=16462+Malden+Circle,+Huntington+Beach,+CA+92649&t=&z=16&ie=UTF8&iwloc=&output=embed" allowfullscreen="" loading="lazy" referrerpolicy="no-referrer-when-downgrade" title="Map"></iframe>
+      </div>
+    </section>
+
+    <!-- Gilbert Island centered section -->
+    <section class="about-centered">
+      <div class="about-centered-inner">
+        <h2 class="about-centered-title" id="t-gilbert">Huntington Harbour<br/>— Gilbert Island</h2>
+        <div class="about-centered-body">
+          <p>Huntington Harbour serves as an expansive maritime sanctuary designed specifically for the yachting lifestyle, featuring a network of navigable waterways. The main channels are engineered to accommodate deep-draft vessels, complemented by generous bridge clearances that allow for easy passage to the open ocean. By maintaining extensive private docking and a strictly enforced no-wake zone, the Harbour ensures a secure and tranquil environment tailored for the maintenance and enjoyment of significant watercraft.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- editorial collage -->
+    <section id="views">
+      <div class="editorial-grid">
+        <!-- Row 1: 50% left | 10% spacer | 40% right (offset down) -->
+        <div class="editorial-row">
+          <div class="ed-50">
+            <div class="para-wrap"><img src="images/collage-1.webp" alt="" loading="lazy"/></div>
+          </div>
+          <div class="ed-spacer"></div>
+          <div class="ed-40 ed-40-sq">
+            <div class="ed-vspace"></div>
+            <div class="para-wrap"><img src="images/collage-2.webp" alt="" loading="lazy"/></div>
+          </div>
+        </div>
+        <!-- Row 2: 40% left (offset down) | 10% spacer | 50% right (offset down) -->
+        <div class="editorial-row">
+          <div class="ed-40 ed-40-land">
+            <div class="ed-vspace"></div>
+            <div class="para-wrap"><img src="images/collage-3.webp" alt="" loading="lazy"/></div>
+          </div>
+          <div class="ed-spacer"></div>
+          <div class="ed-50">
+            <div class="ed-vspace"></div>
+            <div class="para-wrap"><img src="images/collage-4.webp" alt="" loading="lazy"/></div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- 07 · PROPERTY SPECS ─────────────────────────── -->
+    <section id="details" class="spy pad">
+      <p class="sec-eyebrow" id="t-det">Property Specs</p>
+      <div class="accord">
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Interior Features</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">Beamed Ceilings</div><div class="dl-item">Wet Bar</div>
+                <div class="dl-item">Dry Bar</div><div class="dl-item">Breakfast Bar</div>
+                <div class="dl-item">Built-in Features</div><div class="dl-item">Formal Dining Room</div>
+                <div class="dl-item">Eat-in Kitchen</div><div class="dl-item">Full Elevator</div>
+                <div class="dl-item">Living Room Deck Attached</div><div class="dl-item">Open Floorplan</div>
+                <div class="dl-item">Recessed Lighting</div><div class="dl-item">Bedroom on Main Level</div>
+                <div class="dl-item">Multiple Primary Suites</div><div class="dl-item">Walk-In Pantry</div>
+                <div class="dl-item">Walk-In Closet(s)</div><div class="dl-item">Inside Laundry Room</div>
+                <div class="dl-item">Stone Tile &amp; Carpet Flooring</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Appliances &amp; Kitchen</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">6-Burner Stove</div><div class="dl-item">Double Oven</div>
+                <div class="dl-item">Dishwasher</div><div class="dl-item">Freezer</div>
+                <div class="dl-item">Gas Range</div><div class="dl-item">Refrigerator</div>
+                <div class="dl-item">Water to Refrigerator</div><div class="dl-item">Walk-In Pantry</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Fireplaces</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">Living Room</div><div class="dl-item">Primary Bedroom</div>
+                <div class="dl-item">Primary Bath</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Exterior &amp; Structure</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">Custom Architecture</div><div class="dl-item">Two Stories</div>
+                <div class="dl-item">Attached 3-Car Garage</div><div class="dl-item">6 Total Parking Spaces</div>
+                <div class="dl-item">Driveway Level Access</div><div class="dl-item">Garage Door Opener</div>
+                <div class="dl-item">Sliding Doors</div><div class="dl-item">Double Pane Windows</div>
+                <div class="dl-item">Concrete &amp; Tile Patio</div><div class="dl-item">Updated / Remodeled</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Climate &amp; Utilities</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">Central Forced Air Heat</div><div class="dl-item">Central Air with Zoning</div>
+                <div class="dl-item">Cable Connected</div><div class="dl-item">Natural Gas Connected</div>
+                <div class="dl-item">Public Sewer</div><div class="dl-item">Public Water Source</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="acc-item">
+          <button class="acc-trigger" aria-expanded="false">
+            <span class="acc-label">Community &amp; Schools</span>
+            <span class="acc-icon"><svg viewBox="0 0 14 14" fill="none"><path d="M7 1v12M1 7h12" stroke="currentColor" stroke-width="1"/></svg></span>
+          </button>
+          <div class="acc-body">
+            <div class="acc-inner">
+              <div class="detail-list">
+                <div class="dl-item">Gilbert Island</div><div class="dl-item">Orange</div>
+                <div class="dl-item">Navigable Water Access</div>
+                <div class="dl-item">Ocean Side of Freeway</div><div class="dl-item">HB Union High School District</div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- 08 · CONTACT ────────────────────────────────── -->
+    <section id="contact" class="spy pad">
+      <p class="sec-eyebrow" id="t-con">Contact Us</p>
+      <div class="contact-g">
+        <div class="contact-img-w">
+          <div class="para-wrap"><img src="public/images/_JD36817%20NEW%20EDIT%201x1%20crop.jpg" alt="John Stanaland" loading="lazy"/></div>
+        </div>
+        <div class="cform-col">
+          <form id="cform">
+            <div class="f-row">
+              <div class="f-group"><input class="f-field" type="text" name="fn" placeholder="First Name" required/></div>
+              <div class="f-group"><input class="f-field" type="text" name="ln" placeholder="Last Name" required/></div>
+            </div>
+            <div class="f-group"><input class="f-field" type="email" name="em" placeholder="Email Address" required/></div>
+            <div class="f-group"><input class="f-field" type="tel" name="ph" placeholder="Phone Number"/></div>
+            <div class="f-group"><textarea class="f-field" name="msg" placeholder="Message" rows="4"></textarea></div>
+            <button type="submit" class="f-sub">Send Message →</button>
+            <div class="f-ok" id="f-ok">Thank you — we'll be in touch shortly.</div>
+            <div class="f-err" id="f-err">Something went wrong. Please try again.</div>
+          </form>
+          <div class="c-agents-row">
+            <div class="c-agent">
+              <div class="c-agent-name">John Stanaland</div>
+              <div class="c-agent-info">
+                <a href="tel:9496899047">949.689.9047</a><br/>
+                <a href="mailto:john@johnstanaland.com">john@johnstanaland.com</a><br/>
+                <a href="https://instagram.com/johnstanaland" class="c-agent-ig" target="_blank" rel="noopener">
+                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" width="11" height="11"><rect x="2" y="2" width="20" height="20" rx="5" ry="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                  johnstanaland
+                </a><br/>
+                CalDRE #01223768 &nbsp;&middot;&nbsp; The Agency
+              </div>
+            </div>
+            <div class="c-agent">
+              <div class="c-agent-name">Zach Goldstein</div>
+              <div class="c-agent-info">
+                CalDRE #01454329 &nbsp;&middot;&nbsp; The Agency
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Footer -->
+  <footer id="footer">
+    <div class="ft-logos">
+      <img src="public/_logo.svg" alt="The Agency" class="ft-logo ft-logo-agency"/>
+      <img src="public/John Stanaland Group_Branding_Full Logo_Black.svg" alt="John Stanaland Group" class="ft-logo"/>
+    </div>
+    <div class="ft-right">
+      <p class="ft-address">16462 Malden Circle &nbsp;&middot;&nbsp; Huntington Beach, CA 92649</p>
+      <p class="ft-copy">&copy; 2026 The Agency. All rights reserved.</p>
+    </div>
+  </footer>
+
+  <!-- Lightbox -->
+  <div id="lightbox" aria-hidden="true">
+    <button id="lb-close" aria-label="Close">&#215;</button>
+    <button id="lb-prev" aria-label="Previous">
+      <svg viewBox="0 0 36 16" fill="none"><path d="M7 1L1 8m0 0l6 7M1 8h34" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <div id="lb-img-wrap">
+      <img id="lb-img" src="" alt=""/>
+      <div id="lb-arrows-mobile">
+        <button id="lb-prev-m" aria-label="Previous">
+          <svg viewBox="0 0 36 16" fill="none"><path d="M7 1L1 8m0 0l6 7M1 8h34" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+        <div id="lb-counter-m"></div>
+        <button id="lb-next-m" aria-label="Next">
+          <svg viewBox="0 0 36 16" fill="none"><path d="M29 1l6 7m0 0l-6 7M35 8H1" stroke="currentColor" stroke-width="1.2"/></svg>
+        </button>
+      </div>
+    </div>
+    <button id="lb-next" aria-label="Next">
+      <svg viewBox="0 0 36 16" fill="none"><path d="M29 1l6 7m0 0l-6 7M35 8H1" stroke="currentColor" stroke-width="1.2"/></svg>
+    </button>
+    <div id="lb-counter"></div>
+  </div>
+
+  <!-- Sticky gallery button -->
+  <div id="sticky-gallery">
+    <button id="btn-sticky-gallery">View Full Gallery</button>
+  </div>
+
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@splidejs/splide@3.2.2/dist/js/splide.min.js"></script>
+  <script src="https://unpkg.com/lenis@1.1.14/dist/lenis.min.js"></script>
+
+  <script>
+    gsap.registerPlugin(ScrollTrigger);
+
+    // ─── Lenis smooth scroll ──────────────────────────
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: t => 1 - Math.pow(1 - t, 4),
+      smoothWheel: true,
+      syncTouch: false,
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
+    gsap.ticker.lagSmoothing(0);
+
+    // ─── Anchor scroll via Lenis ──────────────────────
+    document.querySelectorAll('a[href^="#"]').forEach(a => {
+      a.addEventListener('click', e => {
+        const id = a.getAttribute('href');
+        if (id === '#') return;
+        const el = document.querySelector(id);
+        if (!el) return;
+        e.preventDefault();
+        lenis.scrollTo(el, { offset: -80, duration: 1.5 });
+      });
+    });
+
+    // ─── Custom cursor ────────────────────────────────
+    const dot  = document.getElementById('c-dot');
+    const ring = document.getElementById('c-ring');
+    let mx = 0, my = 0, rx = 0, ry = 0;
+    window.addEventListener('mousemove', e => {
+      mx = e.clientX; my = e.clientY;
+      dot.style.left = mx+'px'; dot.style.top = my+'px';
+    }, { passive:true });
+    (function animR() {
+      rx += (mx-rx)*.1; ry += (my-ry)*.1;
+      ring.style.left=rx+'px'; ring.style.top=ry+'px';
+      requestAnimationFrame(animR);
+    })();
+    document.querySelectorAll('a,button,.sl-btn,.acc-trigger').forEach(el => {
+      el.addEventListener('mouseenter', () => document.body.classList.add('ch'));
+      el.addEventListener('mouseleave', () => document.body.classList.remove('ch'));
+    });
+
+    // ─── Page loader + hero entrance ─────────────────
+    const ltl = gsap.timeline({ onComplete() { document.getElementById('loader').style.display='none'; } });
+    ltl
+      .to('#loader-txt', { opacity:1, duration:.7, ease:'power2.out' })
+      .to('#loader-txt', { opacity:0, duration:.4, ease:'power2.in' }, '+=.7')
+      .to('#loader',     { yPercent:-100, duration:1.0, ease:'power3.inOut' }, '-=.2')
+      .to('#main',       { opacity:1, duration:.4 }, '-=.7')
+      .to('#he1',        { opacity:1, duration:1.0, ease:'power3.out' }, '-=.55')
+      .to('#he2',        { y:'0%', duration:.75, ease:'power3.out' }, '-=.65');
+
+    // ─── Hero parallax ────────────────────────────────
+    gsap.to('#hero-bg', {
+      y: '25%', ease: 'none',
+      scrollTrigger: { trigger:'#hero', start:'top top', end:'bottom top', scrub:true }
+    });
+
+    // ─── Hero text fades on scroll ────────────────────
+    const nav = document.getElementById('nav');
+
+    gsap.to('.hero-h1', {
+      opacity: 0, y: -24, ease: 'none',
+      scrollTrigger: { trigger:'#hero', start:'top top', end:'+=260', scrub:0.4 }
+    });
+    gsap.to('.hero-loc', {
+      opacity: 0, y: -12, ease: 'none',
+      scrollTrigger: { trigger:'#hero', start:'top top', end:'+=200', scrub:0.4 }
+    });
+
+    // ─── Nav appears on scroll ────────────────────────
+    ScrollTrigger.create({
+      start: 100,
+      onEnter:     () => nav.classList.add('on'),
+      onLeaveBack: () => nav.classList.remove('on'),
+    });
+
+    window.addEventListener('resize', () => ScrollTrigger.refresh(), { passive:true });
+
+    // ─── Section eyebrows fade up ─────────────────────
+    document.querySelectorAll('.sec-eyebrow').forEach(el => {
+      gsap.fromTo(el,
+        { opacity:0, y:14 },
+        { opacity:1, y:0, duration:.7, ease:'power2.out',
+          scrollTrigger: { trigger:el, start:'top 90%' }
+        }
+      );
+    });
+
+    // ─── Interlude reveal ─────────────────────────────
+    gsap.fromTo('#il-h1',   { opacity:0, y:36 }, { opacity:1, y:0, duration:1.0, ease:'power3.out', scrollTrigger:{ trigger:'#il-h1', start:'top 85%' } });
+    gsap.fromTo('#il-h2',   { opacity:0, y:36 }, { opacity:1, y:0, duration:1.0, ease:'power3.out', scrollTrigger:{ trigger:'#il-h2', start:'top 85%' } });
+    gsap.fromTo('.il-body', { opacity:0, y:20 }, { opacity:1, y:0, duration:.8,  ease:'power2.out', scrollTrigger:{ trigger:'.il-body', start:'top 88%' } });
+    gsap.fromTo('.il-link', { opacity:0, y:10 }, { opacity:1, y:0, duration:.6,  ease:'power2.out', scrollTrigger:{ trigger:'.il-link', start:'top 92%' } });
+
+    // ─── About centered reveal ────────────────────────
+    gsap.fromTo('#t-about',   { opacity:0, y:28 }, { opacity:1, y:0, duration:.85, ease:'power3.out', scrollTrigger:{ trigger:'#t-about',   start:'top 90%' } });
+    gsap.fromTo('#t-gilbert', { opacity:0, y:28 }, { opacity:1, y:0, duration:.85, ease:'power3.out', scrollTrigger:{ trigger:'#t-gilbert', start:'top 90%' } });
+    document.querySelectorAll('.about-centered-body').forEach(body => {
+      gsap.fromTo(body.querySelectorAll('p'),
+        { opacity:0, y:18 },
+        { opacity:1, y:0, duration:.7, stagger:.15, ease:'power2.out',
+          scrollTrigger: { trigger:body, start:'top 82%' }
+        }
+      );
+    });
+
+    // ─── Preview unified stats stagger ───────────────
+    gsap.to('.pv-item', {
+      opacity:1, y:0, duration:.55, ease:'power2.out', stagger:.06,
+      scrollTrigger: { trigger:'.pv-unified', start:'top 88%' }
+    });
+
+    // ─── Highlights slide up ──────────────────────────
+    document.querySelectorAll('.hl-v').forEach((el,i) => {
+      gsap.to(el, {
+        opacity:1, y:0, duration:.6, delay:(i%4)*.09, ease:'power3.out',
+        scrollTrigger: { trigger:el, start:'top 90%' }
+      });
+    });
+
+    // ─── Parallax + hover zoom on all .para-wrap images ──
+    document.querySelectorAll('.para-wrap').forEach(wrap => {
+      const img = wrap.querySelector('img');
+      if (!img) return;
+      gsap.fromTo(img,
+        { y: '-8%' },
+        { y: '8%', ease:'none',
+          scrollTrigger: { trigger:wrap, start:'top bottom', end:'bottom top', scrub:true }
+        }
+      );
+      // No hover zoom on break images or contact image
+      if (wrap.closest('.brk-wrap') || wrap.closest('.contact-img-w')) return;
+      wrap.addEventListener('mouseenter', () => {
+        gsap.to(img, { scale: 1.06, duration: 0.7, ease: 'power2.out', overwrite: 'auto' });
+      });
+      wrap.addEventListener('mouseleave', () => {
+        gsap.to(img, { scale: 1, duration: 0.7, ease: 'power2.out', overwrite: 'auto' });
+      });
+    });
+
+    // ─── Gallery slider ───────────────────────────────
+    const sp1 = new Splide('#sp1', {
+      type:'slide', perPage:3, perMove:1, gap:'10px',
+      arrows:false, pagination:false,
+      speed:900, easing:'cubic-bezier(0.76, 0, 0.24, 1)',
+      breakpoints: { 991:{ perPage:2 }, 640:{ perPage:1 } }
+    }).mount();
+    document.getElementById('s1p').addEventListener('click', e => { e.preventDefault(); sp1.go('<'); });
+    document.getElementById('s1n').addEventListener('click', e => { e.preventDefault(); sp1.go('>'); });
+
+    // ─── Accordion ────────────────────────────────────
+    document.querySelectorAll('.acc-item').forEach(item => {
+      const trigger = item.querySelector('.acc-trigger');
+      const body    = item.querySelector('.acc-body');
+      trigger.addEventListener('click', () => {
+        const wasOpen = item.classList.contains('open');
+        document.querySelectorAll('.acc-item').forEach(i => {
+          i.classList.remove('open');
+          i.querySelector('.acc-body').style.maxHeight = '0';
+          i.querySelector('.acc-trigger').setAttribute('aria-expanded','false');
+        });
+        if (!wasOpen) {
+          item.classList.add('open');
+          body.style.maxHeight = body.scrollHeight + 'px';
+          trigger.setAttribute('aria-expanded','true');
+        }
+      });
+    });
+
+    // ─── Mobile menu ──────────────────────────────────
+    const burger = document.getElementById('burger');
+    const mmenu  = document.getElementById('m-menu');
+    burger.addEventListener('click', () => {
+      mmenu.classList.toggle('open');
+      nav.classList.toggle('menu-open');
+    });
+    function closeMenu() {
+      mmenu.classList.remove('open');
+      nav.classList.remove('menu-open');
+    }
+    mmenu.querySelectorAll('.ml').forEach(l => l.addEventListener('click', closeMenu));
+
+    // ─── Contact form ─────────────────────────────────
+    document.getElementById('cform').addEventListener('submit', e => {
+      e.preventDefault();
+      document.getElementById('f-ok').style.display = 'block';
+    });
+
+    // ─── Gallery lightbox ─────────────────────────────
+    const galleryImages = [
+      'public/slider-gallery/DJI_0257 - resized.webp',
+      'public/slider-gallery/DJI_0260 - resized.webp',
+      'public/slider-gallery/DJI_0262 - resized.webp',
+      'public/slider-gallery/DJI_0265 - resized.webp',
+      'public/slider-gallery/DJI_0266 - resized.webp',
+      'public/slider-gallery/DJI_0269 - resized.webp',
+      'public/slider-gallery/DJI_0271 - resized.webp',
+      'public/slider-gallery/DJI_0275 - resized.webp',
+      'public/slider-gallery/DJI_0277 - resized.webp',
+      'public/slider-gallery/JD4_9337 - resized.webp',
+      'public/slider-gallery/JD4_9338 - resized.webp',
+      'public/slider-gallery/JD4_9339 - resized.webp',
+      'public/slider-gallery/JD4_9341 - resized.webp',
+      'public/slider-gallery/JD4_9345 - resized.webp',
+      'public/slider-gallery/JD4_9354 - resized.webp',
+      'public/slider-gallery/JD4_9357 - resized.webp',
+      'public/slider-gallery/JD4_9359 - resized.webp',
+      'public/slider-gallery/JD4_9360 - resized.webp',
+      'public/slider-gallery/JD4_9361 - resized.webp',
+      'public/slider-gallery/JD4_9363 - resized.webp',
+      'public/slider-gallery/JD4_9364 - resized.webp',
+      'public/slider-gallery/JD4_9369 - resized.webp',
+      'public/slider-gallery/JD4_9371 - resized.webp',
+      'public/slider-gallery/JD4_9374 - resized.webp',
+      'public/slider-gallery/JD4_9383 - resized.webp',
+    ];
+
+    const lb          = document.getElementById('lightbox');
+    const lbImg       = document.getElementById('lb-img');
+    const lbCounter   = document.getElementById('lb-counter');
+    const lbCounterM  = document.getElementById('lb-counter-m');
+    let lbIndex = 0;
+
+    function setLbCounter(idx) {
+      const txt = (idx + 1) + ' / ' + galleryImages.length;
+      lbCounter.textContent = txt;
+      lbCounterM.textContent = txt;
+    }
+
+    function openLightbox(index) {
+      const newIdx = ((index % galleryImages.length) + galleryImages.length) % galleryImages.length;
+      const isOpen = lb.classList.contains('open');
+      lbIndex = newIdx;
+
+      if (isOpen) {
+        lbImg.style.opacity = '0';
+        setTimeout(() => {
+          lbImg.src = galleryImages[lbIndex];
+          setLbCounter(lbIndex);
+          lbImg.style.opacity = '1';
+        }, 220);
+      } else {
+        lbImg.src = galleryImages[lbIndex];
+        setLbCounter(lbIndex);
+        lb.classList.add('open');
+        lb.setAttribute('aria-hidden','false');
+        document.body.classList.add('lb-open');
+        lenis.stop();
+      }
+    }
+
+    function closeLightbox() {
+      lb.classList.remove('open');
+      lb.setAttribute('aria-hidden','true');
+      document.body.classList.remove('lb-open');
+      setTimeout(() => { lbImg.src = ''; }, 420);
+      lenis.start();
+    }
+
+    function lbNext() { openLightbox(lbIndex + 1); }
+    function lbPrev() { openLightbox(lbIndex - 1); }
+
+    document.getElementById('lb-next').addEventListener('click', lbNext);
+    document.getElementById('lb-prev').addEventListener('click', lbPrev);
+    document.getElementById('lb-next-m').addEventListener('click', lbNext);
+    document.getElementById('lb-prev-m').addEventListener('click', lbPrev);
+    lb.addEventListener('click', e => { if (e.target === lb) closeLightbox(); });
+    document.getElementById('lb-close').addEventListener('click', closeLightbox);
+    document.addEventListener('keydown', e => {
+      if (!lb.classList.contains('open')) return;
+      if (e.key === 'Escape')     closeLightbox();
+      if (e.key === 'ArrowRight') lbNext();
+      if (e.key === 'ArrowLeft')  lbPrev();
+    });
+
+    // Image clicks open lightbox at matching index (skip contact and break images)
+    document.querySelectorAll('.para-wrap img').forEach(img => {
+      if (img.closest('.contact-img-w') || img.closest('.brk-wrap')) return;
+      img.addEventListener('click', e => {
+        e.stopPropagation();
+        const filename = img.src.split('/').pop();
+        const idx = galleryImages.findIndex(s => s.endsWith(filename));
+        openLightbox(idx >= 0 ? idx : 0);
+      });
+    });
+
+    // View Full Gallery buttons
+    document.getElementById('btn-open-gallery').addEventListener('click', () => openLightbox(0));
+    document.getElementById('btn-sticky-gallery').addEventListener('click', () => openLightbox(0));
+
+    // ─── Sticky gallery button ────────────────────────
+    const stickyGallery = document.getElementById('sticky-gallery');
+    let stickyScrolled = false;
+    let stickyInFooter = false;
+
+    function updateStickyVisibility() {
+      if (stickyScrolled && !stickyInFooter) {
+        stickyGallery.classList.add('show');
+      } else {
+        stickyGallery.classList.remove('show');
+      }
+    }
+
+    ScrollTrigger.create({
+      start: 300,
+      onEnter:     () => { stickyScrolled = true;  updateStickyVisibility(); },
+      onLeaveBack: () => { stickyScrolled = false; updateStickyVisibility(); },
+    });
+    ScrollTrigger.create({
+      trigger: '#footer',
+      start: 'top bottom',
+      onEnter:     () => { stickyInFooter = true;  updateStickyVisibility(); },
+      onLeaveBack: () => { stickyInFooter = false; updateStickyVisibility(); },
+    });
+
+    // ─── Map overlay ─────────────────────────────────
+    const mapOverlay = document.getElementById('map-overlay');
+    if (mapOverlay) {
+      mapOverlay.addEventListener('click', () => { mapOverlay.style.display = 'none'; });
+      ScrollTrigger.create({
+        trigger: '#location',
+        start: 'bottom bottom',
+        onLeave:     () => { mapOverlay.style.display = 'block'; },
+        onEnterBack: () => { mapOverlay.style.display = 'block'; },
+      });
+    }
+  </script>
+
+</body>
+</html>
