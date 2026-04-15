@@ -56,6 +56,7 @@
     body.ch #c-ring { width: 54px; height: 54px; opacity:.5; }
     body.lb-open #c-dot { background: #fff; }
     body.lb-open #c-ring { border-color: rgba(255,255,255,0.4); }
+    .para-wrap.img-in { opacity: 1 !important; }
     .vessel-br { display: none; }
     @media (max-width: 640px) {
       .vessel-sep { display: none; }
@@ -293,9 +294,6 @@
     .para-wrap img {
       width:100%; height:115%;
       object-fit:cover; display:block;
-      transform: translate3d(0,0,0);
-      will-change: transform;
-      backface-visibility: hidden;
     }
 
     /* ─── Preview — unified 2×4 stats grid ──────── */
@@ -1114,7 +1112,6 @@
       lenis.on('scroll', ScrollTrigger.update);
       gsap.ticker.add(t => lenis.raf(t * 1000));
     } else {
-      // Native scroll on touch — ScrollTrigger handles its own scroll detection
       lenis = {
         scrollTo: (el, opts) => {
           const y = el.getBoundingClientRect().top + window.scrollY + (opts?.offset || 0);
@@ -1123,6 +1120,8 @@
         stop:  () => { document.body.style.overflow = 'hidden'; },
         start: () => { document.body.style.overflow = ''; },
       };
+      // THE fix for iOS Safari jitter: normalizes scroll through GSAP's RAF loop
+      ScrollTrigger.normalizeScroll({ allowNestedScroll: true, lockAxis: false });
       ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
     }
     gsap.ticker.lagSmoothing(0);
@@ -1236,20 +1235,34 @@
       });
     });
 
-    // ─── Parallax + hover zoom on all .para-wrap images ──
+    // ─── Mobile image fade via IntersectionObserver (no extra ScrollTrigger) ──
+    if (isTouchDevice) {
+      const io = new IntersectionObserver((entries) => {
+        entries.forEach(e => {
+          if (e.isIntersecting) { e.target.classList.add('img-in'); io.unobserve(e.target); }
+        });
+      }, { rootMargin: '0px 0px -6% 0px' });
+      document.querySelectorAll('.para-wrap').forEach(w => {
+        w.style.opacity = '0';
+        w.style.transition = 'opacity 0.6s ease';
+        io.observe(w);
+      });
+      // Mark already-visible wraps immediately
+      document.querySelectorAll('.para-wrap').forEach(w => {
+        const r = w.getBoundingClientRect();
+        if (r.top < window.innerHeight && r.bottom > 0) w.classList.add('img-in');
+      });
+    }
+
+    // ─── Parallax + hover zoom ────────────────────────
     document.querySelectorAll('.para-wrap').forEach(wrap => {
       const img = wrap.querySelector('img');
       if (!img) return;
 
+      // On mobile, skip parallax for gallery slider images (clipped, not worth the CPU)
+      if (isTouchDevice && wrap.closest('.splide__slide')) return;
+
       if (isTouchDevice) {
-        // On mobile: fade in softly via GSAP as image enters viewport
-        gsap.fromTo(wrap,
-          { opacity: 0 },
-          { opacity: 1, duration: 0.7, ease: 'power1.out',
-            scrollTrigger: { trigger: wrap, start: 'top 92%', toggleActions: 'play none none none' }
-          }
-        );
-        // Lighter parallax on mobile
         gsap.fromTo(img,
           { y: '-3%' },
           { y: '3%', ease: 'none',
@@ -1257,14 +1270,12 @@
           }
         );
       } else {
-        // Desktop: full parallax
         gsap.fromTo(img,
           { y: '-8%' },
           { y: '8%', ease: 'none',
             scrollTrigger: { trigger: wrap, start: 'top bottom', end: 'bottom top', scrub: true }
           }
         );
-        // No hover zoom on break images or contact image
         if (wrap.closest('.brk-wrap') || wrap.closest('.contact-img-w')) return;
         wrap.addEventListener('mouseenter', () => {
           gsap.to(img, { scale: 1.06, duration: 0.7, ease: 'power2.out', overwrite: 'auto' });
