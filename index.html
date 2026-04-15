@@ -56,7 +56,15 @@
     body.ch #c-ring { width: 54px; height: 54px; opacity:.5; }
     body.lb-open #c-dot { background: #fff; }
     body.lb-open #c-ring { border-color: rgba(255,255,255,0.4); }
-    @media (pointer:coarse) { body { cursor: auto; } #c-dot, #c-ring { display:none; } }
+    @media (pointer:coarse) {
+      body { cursor: auto; }
+      #c-dot, #c-ring { display:none; }
+      .para-wrap img {
+        opacity: 0;
+        transition: opacity 0.55s ease;
+      }
+      .para-wrap.img-visible img { opacity: 1; }
+    }
 
     /* ─── Loader ─────────────────────────────────── */
     #loader {
@@ -232,6 +240,8 @@
       top: -40%; left:0; right:0; bottom:0;
       background: url('images/hero.webp') bottom center/cover no-repeat;
       will-change: transform;
+      backface-visibility: hidden;
+      transform: translate3d(0,0,0);
     }
     #hero-veil { display: none; }
     .hero-c {
@@ -283,8 +293,9 @@
     .para-wrap img {
       width:100%; height:115%;
       object-fit:cover; display:block;
-      transform: translateY(0);
+      transform: translate3d(0,0,0);
       will-change: transform;
+      backface-visibility: hidden;
     }
 
     /* ─── Preview — unified 2×4 stats grid ──────── */
@@ -397,12 +408,14 @@
       width:100%; background:none; border:none; cursor:none;
       display:flex; align-items:center; justify-content:space-between;
       padding:24px 0; text-align:left;
+      color: var(--black); -webkit-tap-highlight-color: transparent;
     }
     .acc-label {
       font-family: "area-normal", sans-serif;
       font-weight:600; font-style:normal;
       font-size: clamp(14px,1.8vw,19px);
       letter-spacing:.07em; text-transform:uppercase;
+      color: var(--black);
     }
     .acc-icon {
       width:22px; height:22px; flex-shrink:0;
@@ -442,6 +455,7 @@
     .f-group { margin-bottom:16px; }
     .f-field {
       width:100%; border:none; border-bottom:1px solid var(--rule);
+      border-radius: 0; -webkit-appearance: none; appearance: none;
       padding:14px 0;
       font-family:'Space Grotesk',Helvetica,sans-serif;
       font-size:14px; font-weight:400;
@@ -652,9 +666,13 @@
       .hl-grid { grid-template-columns:repeat(2,1fr); }
       .c-agents-row { flex-direction: column; gap: 28px; }
       .hero-loc span { font-size: 16px; }
-      #footer { flex-direction: column; align-items: flex-start; gap: 20px; }
-      .ft-right { align-items: flex-start; }
-      .ft-address, .ft-copy { text-align: left; }
+      #footer { flex-direction: column; align-items: center; gap: 20px; text-align: center; }
+      .ft-logos { justify-content: center; }
+      .ft-right { align-items: center; }
+      .ft-address, .ft-copy { text-align: center; }
+      .sec-eyebrow { font-size: 28px; }
+      .il-h { font-size: 28px; }
+      .about-centered-title { font-size: 28px; }
       #sticky-gallery { bottom: 20px; right: 16px; }
       #btn-sticky-gallery { padding: 12px 20px; }
     }
@@ -1082,15 +1100,30 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // ─── Lenis smooth scroll ──────────────────────────
-    const lenis = new Lenis({
-      duration: 1.4,
-      easing: t => 1 - Math.pow(1 - t, 4),
-      smoothWheel: true,
-      syncTouch: false,
-    });
-    lenis.on('scroll', ScrollTrigger.update);
-    gsap.ticker.add(t => lenis.raf(t * 1000));
+    // ─── Lenis smooth scroll (desktop only) ──────────
+    const isTouchDevice = window.matchMedia('(pointer:coarse)').matches;
+    let lenis;
+    if (!isTouchDevice) {
+      lenis = new Lenis({
+        duration: 1.4,
+        easing: t => 1 - Math.pow(1 - t, 4),
+        smoothWheel: true,
+        syncTouch: false,
+      });
+      lenis.on('scroll', ScrollTrigger.update);
+      gsap.ticker.add(t => lenis.raf(t * 1000));
+    } else {
+      // Native scroll on touch — just keep ScrollTrigger in sync
+      lenis = {
+        scrollTo: (el, opts) => {
+          const y = el.getBoundingClientRect().top + window.scrollY + (opts?.offset || 0);
+          window.scrollTo({ top: y, behavior: 'smooth' });
+        },
+        stop:  () => { document.body.style.overflow = 'hidden'; },
+        start: () => { document.body.style.overflow = ''; },
+      };
+      window.addEventListener('scroll', ScrollTrigger.update, { passive: true });
+    }
     gsap.ticker.lagSmoothing(0);
 
     // ─── Anchor scroll via Lenis ──────────────────────
@@ -1202,14 +1235,33 @@
       });
     });
 
+    // ─── Mobile image fade-in via IntersectionObserver ───
+    if (isTouchDevice) {
+      const fadeObserver = new IntersectionObserver((entries) => {
+        entries.forEach(entry => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add('img-visible');
+            fadeObserver.unobserve(entry.target);
+          }
+        });
+      }, { threshold: 0.08 });
+      document.querySelectorAll('.para-wrap').forEach(wrap => fadeObserver.observe(wrap));
+    }
+
     // ─── Parallax + hover zoom on all .para-wrap images ──
     document.querySelectorAll('.para-wrap').forEach(wrap => {
       const img = wrap.querySelector('img');
       if (!img) return;
+      // Parallax: reduced amount on touch, full on desktop
+      const yAmt = isTouchDevice ? '4%' : '8%';
       gsap.fromTo(img,
-        { y: '-8%' },
-        { y: '8%', ease:'none',
-          scrollTrigger: { trigger:wrap, start:'top bottom', end:'bottom top', scrub:true }
+        { y: '-' + yAmt },
+        { y: yAmt, ease:'none',
+          scrollTrigger: {
+            trigger: wrap, start:'top bottom', end:'bottom top',
+            scrub: isTouchDevice ? 2 : true,
+            fastScrollEnd: true,
+          }
         }
       );
       // No hover zoom on break images or contact image
@@ -1227,7 +1279,8 @@
       type:'slide', perPage:3, perMove:1, gap:'10px',
       arrows:false, pagination:false,
       speed:900, easing:'cubic-bezier(0.76, 0, 0.24, 1)',
-      breakpoints: { 991:{ perPage:2 }, 640:{ perPage:1 } }
+      preloadPages: 3,
+      breakpoints: { 991:{ perPage:2 }, 640:{ perPage:1, preloadPages:2 } }
     }).mount();
     document.getElementById('s1p').addEventListener('click', e => { e.preventDefault(); sp1.go('<'); });
     document.getElementById('s1n').addEventListener('click', e => { e.preventDefault(); sp1.go('>'); });
@@ -1409,6 +1462,7 @@
       });
     }
   </script>
+
 
 </body>
 </html>
