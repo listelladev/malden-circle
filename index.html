@@ -230,7 +230,7 @@
 
     /* ─── Hero ───────────────────────────────────── */
     #hero {
-      position:relative; height:100vh; min-height:640px;
+      position:relative; height:100svh; min-height:640px;
       overflow:visible; display:flex; align-items:flex-start; justify-content:center;
     }
     #hero-media {
@@ -241,8 +241,6 @@
       top: -40%; left:0; right:0; bottom:0;
       background: url('images/hero.webp') bottom center/cover no-repeat;
       will-change: transform;
-      backface-visibility: hidden;
-      transform: translate3d(0,0,0);
     }
     #hero-veil { display: none; }
     .hero-c {
@@ -1165,8 +1163,10 @@
       .to('#he2',        { y:'0%', duration:.75, ease:'power3.out' }, '-=.65');
 
     // ─── Hero parallax ────────────────────────────────
+    gsap.set('#hero-bg', { force3D: true });
     gsap.to('#hero-bg', {
-      y: isTouchDevice ? '12%' : '25%', ease: 'none',
+      y: isTouchDevice ? window.innerHeight * 0.1 : window.innerHeight * 0.25,
+      ease: 'none',
       scrollTrigger: {
         trigger: '#hero', start: 'top top', end: 'bottom top',
         scrub: true,
