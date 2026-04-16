@@ -59,9 +59,13 @@
     .para-wrap.mob-fade { opacity: 0; transition: opacity 0.45s ease; }
     .para-wrap.mob-fade.img-in { opacity: 1; }
     .vessel-br { display: none; }
+    .mob-br-water { display: none; }
+    .mob-br-skiff { display: none; }
     @media (max-width: 640px) {
       .vessel-sep { display: none; }
       .vessel-br { display: block; }
+      .mob-br-water { display: inline; }
+      .mob-br-skiff { display: inline; }
     }
     @media (pointer:coarse) {
       body { cursor: auto; }
@@ -727,7 +731,7 @@
     <!-- Crafted for the Water interlude -->
     <div class="interlude">
       <div class="interlude-inner">
-        <h2 class="il-h" id="il-h1">Crafted for the Water</h2>
+        <h2 class="il-h" id="il-h1">Crafted for<span class="mob-br-water"><br/></span> the Water</h2>
         <p class="il-body">Set along the protected waterways of Gilbert Island, 16462 Malden Circle is among Huntington Beach's most distinguished residences — 6,731 square feet of architecture, refinement, and an extraordinary connection to the water.</p>
         <a href="#gallery" class="il-link">Explore the Property</a>
       </div>
@@ -742,7 +746,7 @@
     <!-- dock interlude -->
     <div class="interlude" style="padding-bottom:0">
       <div class="interlude-inner">
-        <h2 class="il-h" id="il-h2">Private Dock Accommodates<br/>±70&prime; Vessel<span class="vessel-sep"> &nbsp;&middot;&nbsp; </span><br class="vessel-br"/>±65&prime; Vessel<br/>Plus a Duffy or a Skiff</h2>
+        <h2 class="il-h" id="il-h2">Private Dock Accommodates<br/>±70&prime; Vessel<span class="vessel-sep"> &nbsp;&middot;&nbsp; </span><br class="vessel-br"/>±65&prime; Vessel<br/>Plus a Duffy<span class="mob-br-skiff"><br/></span> or a Skiff</h2>
         <p class="il-body" style="margin-bottom:0">Opportunities to acquire a residence of such caliber, position, and architectural significance are exceedingly rare. This custom-built estate stands as one of the premier properties within the Huntington Harbour enclave, occupying a coveted position on the Main Channel of the exclusive Gilbert Island.</p>
       </div>
     </div>
@@ -1145,14 +1149,26 @@
     });
 
     // ─── Page loader + hero entrance ─────────────────
-    const ltl = gsap.timeline({ onComplete() { document.getElementById('loader').style.display='none'; } });
-    ltl
-      .to('#loader-txt', { opacity:1, duration:.7, ease:'power2.out' })
-      .to('#loader-txt', { opacity:0, duration:.4, ease:'power2.in' }, '+=.7')
-      .to('#loader',     { yPercent:-100, duration:1.0, ease:'power3.inOut' }, '-=.2')
-      .to('#main',       { opacity:1, duration:.4 }, '-=.7')
-      .to('#he1',        { opacity:1, duration:1.0, ease:'power3.out' }, '-=.55')
-      .to('#he2',        { y:'0%', duration:.75, ease:'power3.out' }, '-=.65');
+    const loaderEl = document.getElementById('loader');
+    const hasVisited = sessionStorage.getItem('mc_visited');
+
+    if (hasVisited) {
+      // Returning visit in same session — skip loader instantly
+      loaderEl.style.display = 'none';
+      gsap.set('#main', { opacity: 1 });
+      gsap.set('#he1',  { opacity: 1 });
+      gsap.set('#he2',  { y: '0%' });
+    } else {
+      sessionStorage.setItem('mc_visited', '1');
+      const ltl = gsap.timeline({ onComplete() { loaderEl.style.display = 'none'; } });
+      ltl
+        .to('#loader-txt', { opacity:1, duration:.7, ease:'power2.out' })
+        .to('#loader-txt', { opacity:0, duration:.4, ease:'power2.in' }, '+=.7')
+        .to('#loader',     { yPercent:-100, duration:1.0, ease:'power3.inOut' }, '-=.2')
+        .to('#main',       { opacity:1, duration:.4 }, '-=.7')
+        .to('#he1',        { opacity:1, duration:1.0, ease:'power3.out' }, '-=.55')
+        .to('#he2',        { y:'0%', duration:.75, ease:'power3.out' }, '-=.65');
+    }
 
     // ─── Hero text fades on scroll ────────────────────
     const nav = document.getElementById('nav');
@@ -1288,7 +1304,7 @@
         entries.forEach(e => {
           if (e.isIntersecting) { e.target.classList.add('img-in'); io.unobserve(e.target); }
         });
-      }, { rootMargin: '120px 0px 0px 0px' }); // trigger 120px before entering viewport
+      }, { rootMargin: '0px 0px 200px 0px' }); // trigger 200px before element enters from bottom
       document.querySelectorAll('.para-wrap').forEach(w => io.observe(w));
     }
 
