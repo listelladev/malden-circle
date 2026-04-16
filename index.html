@@ -1350,9 +1350,27 @@
     mmenu.querySelectorAll('.ml').forEach(l => l.addEventListener('click', closeMenu));
 
     // ─── Contact form ─────────────────────────────────
-    document.getElementById('cform').addEventListener('submit', e => {
+    document.getElementById('cform').addEventListener('submit', async e => {
       e.preventDefault();
-      document.getElementById('f-ok').style.display = 'block';
+      const form = e.target;
+      const btn  = form.querySelector('.f-sub');
+      btn.disabled = true;
+      btn.textContent = 'Sending…';
+      try {
+        const res = await fetch('/api/contact', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(Object.fromEntries(new FormData(form))),
+        });
+        if (!res.ok) throw new Error();
+        document.getElementById('f-ok').style.display = 'block';
+        form.reset();
+      } catch {
+        document.getElementById('f-err').style.display = 'block';
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Send Message →';
+      }
     });
 
     // ─── Gallery lightbox ─────────────────────────────
