@@ -1096,32 +1096,20 @@
   <script>
     gsap.registerPlugin(ScrollTrigger);
 
-    // ─── Lenis smooth scroll (desktop only) ──────────
+    // ─── Lenis smooth scroll ──────────────────────────
     const isTouchDevice = window.matchMedia('(pointer:coarse)').matches;
-    let lenis;
-    if (!isTouchDevice) {
-      lenis = new Lenis({
-        duration: 1.4,
-        easing: t => 1 - Math.pow(1 - t, 4),
-        smoothWheel: true,
-        syncTouch: false,
-      });
-      lenis.on('scroll', ScrollTrigger.update);
-      gsap.ticker.add(t => lenis.raf(t * 1000));
-    } else {
-      lenis = {
-        scrollTo: (el, opts) => {
-          const y = el.getBoundingClientRect().top + window.scrollY + (opts?.offset || 0);
-          window.scrollTo({ top: y, behavior: 'smooth' });
-        },
-        stop:  () => { document.body.style.overflow = 'hidden'; },
-        start: () => { document.body.style.overflow = ''; },
-      };
-      ScrollTrigger.config({ ignoreMobileResize: true, limitCallbacks: true });
-    }
+    const lenis = new Lenis({
+      duration: 1.4,
+      easing: t => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smoothWheel: true,
+      smoothTouch: false, // hands native touch momentum back to iOS Safari
+    });
+    lenis.on('scroll', ScrollTrigger.update);
+    gsap.ticker.add(t => lenis.raf(t * 1000));
     gsap.ticker.lagSmoothing(0);
+    ScrollTrigger.config({ ignoreMobileResize: true });
 
-    // ─── Anchor scroll via Lenis ──────────────────────
+    // ─── Anchor scroll ────────────────────────────────
     document.querySelectorAll('a[href^="#"]').forEach(a => {
       a.addEventListener('click', e => {
         const id = a.getAttribute('href');
@@ -1129,7 +1117,11 @@
         const el = document.querySelector(id);
         if (!el) return;
         e.preventDefault();
-        lenis.scrollTo(el, { offset: -80, duration: 1.5 });
+        if (isTouchDevice) {
+          window.scrollTo({ top: el.getBoundingClientRect().top + window.scrollY - 80, behavior: 'smooth' });
+        } else {
+          lenis.scrollTo(el, { offset: -80, duration: 1.5 });
+        }
       });
     });
 
@@ -1240,7 +1232,11 @@
       onLeaveBack: () => nav.classList.remove('on'),
     });
 
-    window.addEventListener('resize', () => ScrollTrigger.refresh(), { passive:true });
+    let lastWidth = window.innerWidth;
+    window.addEventListener('resize', () => {
+      const w = window.innerWidth;
+      if (w !== lastWidth) { lastWidth = w; ScrollTrigger.refresh(); }
+    }, { passive: true });
 
     // ─── Section eyebrows fade up ─────────────────────
     document.querySelectorAll('.sec-eyebrow').forEach(el => {
