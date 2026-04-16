@@ -229,6 +229,7 @@
       height: clamp(665px, 96vh, 1225px);
     }
     .brk-wrap img {
+      position: absolute; bottom: 0; top: auto;
       height: 120%; width: 100%;
       object-fit: cover;
     }
@@ -634,6 +635,7 @@
       .nav-burger { display:flex; }
     }
     @media(max-width:640px) {
+      #atp-img { object-position: 80% bottom !important; }
       .pv-unified { grid-template-columns: repeat(2, 1fr); }
       .pv-item:nth-last-child(-n+2) { border-bottom: none; }
       .intro-grid { grid-template-columns:1fr; }
@@ -741,7 +743,7 @@
 
     <!-- full-width break image -->
     <div class="brk-wrap para-wrap">
-      <img src="images/above-the-property.webp" alt="" loading="lazy" style="object-position:bottom"/>
+      <img id="atp-img" src="images/above-the-property.webp" alt="" loading="lazy" style="object-position:bottom"/>
     </div>
 
     <!-- 03 · GALLERY ────────────────────────────────── -->
