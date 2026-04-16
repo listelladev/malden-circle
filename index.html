@@ -56,7 +56,8 @@
     body.ch #c-ring { width: 54px; height: 54px; opacity:.5; }
     body.lb-open #c-dot { background: #fff; }
     body.lb-open #c-ring { border-color: rgba(255,255,255,0.4); }
-    .para-wrap.img-in { opacity: 1 !important; }
+    .para-wrap.mob-fade { opacity: 0; transition: opacity 0.45s ease; }
+    .para-wrap.mob-fade.img-in { opacity: 1; }
     .vessel-br { display: none; }
     @media (max-width: 640px) {
       .vessel-sep { display: none; }
@@ -420,7 +421,7 @@
     }
     .acc-icon svg { width:12px; height:12px; }
     .acc-item.open .acc-icon { transform:rotate(45deg); }
-    .acc-body { max-height:0; overflow:hidden; transition: max-height .45s cubic-bezier(.4,0,.2,1); }
+    .acc-body { height:0; overflow:hidden; transition: height .3s cubic-bezier(.4,0,.2,1); }
     .acc-inner { padding:0 0 36px; }
     .detail-list {
       display:grid; grid-template-columns:repeat(2,1fr);
@@ -1280,23 +1281,15 @@
       });
     });
 
-    // ─── Mobile image fade via IntersectionObserver (no extra ScrollTrigger) ──
+    // ─── Mobile image fade via IntersectionObserver ──
     if (isTouchDevice) {
+      document.querySelectorAll('.para-wrap').forEach(w => w.classList.add('mob-fade'));
       const io = new IntersectionObserver((entries) => {
         entries.forEach(e => {
           if (e.isIntersecting) { e.target.classList.add('img-in'); io.unobserve(e.target); }
         });
-      }, { rootMargin: '0px 0px -6% 0px' });
-      document.querySelectorAll('.para-wrap').forEach(w => {
-        w.style.opacity = '0';
-        w.style.transition = 'opacity 0.6s ease';
-        io.observe(w);
-      });
-      // Mark already-visible wraps immediately
-      document.querySelectorAll('.para-wrap').forEach(w => {
-        const r = w.getBoundingClientRect();
-        if (r.top < window.innerHeight && r.bottom > 0) w.classList.add('img-in');
-      });
+      }, { rootMargin: '120px 0px 0px 0px' }); // trigger 120px before entering viewport
+      document.querySelectorAll('.para-wrap').forEach(w => io.observe(w));
     }
 
     // ─── Parallax + hover zoom ────────────────────────
@@ -1344,12 +1337,12 @@
         const wasOpen = item.classList.contains('open');
         document.querySelectorAll('.acc-item').forEach(i => {
           i.classList.remove('open');
-          i.querySelector('.acc-body').style.maxHeight = '0';
+          i.querySelector('.acc-body').style.height = '0';
           i.querySelector('.acc-trigger').setAttribute('aria-expanded','false');
         });
         if (!wasOpen) {
           item.classList.add('open');
-          body.style.maxHeight = body.scrollHeight + 'px';
+          body.style.height = body.scrollHeight + 'px';
           trigger.setAttribute('aria-expanded','true');
         }
       });
@@ -1423,10 +1416,15 @@
       if (isOpen) {
         lbImg.style.opacity = '0';
         setTimeout(() => {
-          lbImg.src = galleryImages[lbIndex];
+          const newSrc = galleryImages[lbIndex];
           setLbCounter(lbIndex);
-          lbImg.style.opacity = '1';
-        }, 220);
+          lbImg.onload = () => { lbImg.style.opacity = '1'; lbImg.onload = null; };
+          lbImg.src = newSrc;
+          // Already cached — fire immediately
+          if (lbImg.complete && lbImg.naturalWidth > 0) {
+            lbImg.style.opacity = '1'; lbImg.onload = null;
+          }
+        }, 180);
       } else {
         lbImg.src = galleryImages[lbIndex];
         setLbCounter(lbIndex);
